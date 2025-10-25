@@ -1,14 +1,402 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link rel="stylesheet" href="styles.css" />
-<button onclick="PortalsSdk.closeIframe()">Close</button>
-  </head>
-  <body></body>
-  <script src="https://portals-labs.github.io/portals-sdk/portals-sdk.js?v=10005456"></script>
-  <script src="script.js"></script>
-</html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Соединение Проводов</title>
+    <style>
+        :root {
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-brown-600: rgba(94, 82, 64, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-700: rgba(26, 104, 115, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-red-500: rgba(192, 21, 47, 1);
+            --color-orange-400: rgba(230, 129, 97, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-success: var(--color-teal-500);
+            --radius-base: 8px;
+            --radius-lg: 12px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-24: 24px;
+            --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-size-base: 14px;
+            --font-size-lg: 16px;
+            --font-size-2xl: 20px;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 550;
+        }
 
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-gray-400-rgb: 119, 124, 124;
+                --color-teal-300-rgb: 50, 184, 198;
+                --color-gray-300-rgb: 167, 169, 169;
+                --color-gray-200-rgb: 245, 245, 245;
+                --color-background: var(--color-charcoal-700);
+                --color-surface: var(--color-charcoal-800);
+                --color-text: var(--color-gray-200);
+                --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
+                --color-primary: var(--color-teal-300);
+                --color-primary-hover: var(--color-teal-400);
+                --color-border: rgba(var(--color-gray-400-rgb), 0.3);
+                --color-success: var(--color-teal-300);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background: var(--color-background);
+            color: var(--color-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: var(--space-16);
+        }
+
+        .game-container {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--space-24);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: var(--space-24);
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-24);
+            font-size: var(--font-size-base);
+        }
+
+        .level, .moves {
+            font-weight: var(--font-weight-medium);
+        }
+
+        .board {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-24);
+            position: relative;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-16);
+        }
+
+        .wire-point {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid var(--color-border);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .wire-point:hover {
+            transform: scale(1.1);
+            border-color: var(--color-primary);
+        }
+
+        .wire-point.selected {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(var(--color-teal-500-rgb), 0.3);
+        }
+
+        .wire-point.connected {
+            background: var(--color-success);
+            border-color: var(--color-success);
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .wire {
+            stroke-width: 3;
+            fill: none;
+            transition: stroke 0.3s;
+        }
+
+        .buttons {
+            display: flex;
+            gap: var(--space-12);
+            justify-content: center;
+        }
+
+        .btn {
+            padding: var(--space-12) var(--space-24);
+            border: none;
+            border-radius: var(--radius-base);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-family-base);
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: var(--color-cream-50);
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--color-border);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.8;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: var(--space-16);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-success);
+            min-height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🔌 Соединение Проводов</h1>
+        
+        <div class="game-info">
+            <div class="level">Уровень: <span id="levelDisplay">1</span></div>
+            <div class="moves">Ходы: <span id="movesDisplay">0</span></div>
+        </div>
+
+        <div class="board" id="board">
+            <svg id="svg"></svg>
+            <div class="column" id="leftColumn"></div>
+            <div class="column" id="rightColumn"></div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="newGame()">Новая игра</button>
+            <button class="btn btn-secondary" onclick="resetLevel()">Сброс</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
+        let level = 1;
+        let moves = 0;
+        let selectedPoint = null;
+        let connections = [];
+        let correctPairs = [];
+
+        function initGame() {
+            level = 1;
+            moves = 0;
+            updateDisplay();
+            createLevel();
+        }
+
+        function createLevel() {
+            const numPairs = Math.min(3 + level, 8);
+            const leftColumn = document.getElementById('leftColumn');
+            const rightColumn = document.getElementById('rightColumn');
+            const svg = document.getElementById('svg');
+            
+            leftColumn.innerHTML = '';
+            rightColumn.innerHTML = '';
+            svg.innerHTML = '';
+            connections = [];
+            selectedPoint = null;
+            correctPairs = [];
+
+            const leftColors = [...colors].slice(0, numPairs);
+            const rightColors = [...leftColors].sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < numPairs; i++) {
+                correctPairs.push({ left: leftColors[i], right: leftColors[i] });
+            }
+
+            leftColors.forEach((color, i) => {
+                const point = createWirePoint(color, 'left', i);
+                leftColumn.appendChild(point);
+            });
+
+            rightColors.forEach((color, i) => {
+                const point = createWirePoint(color, 'right', i);
+                rightColumn.appendChild(point);
+            });
+
+            document.getElementById('message').textContent = '';
+        }
+
+        function createWirePoint(color, side, index) {
+            const point = document.createElement('div');
+            point.className = 'wire-point';
+            point.style.backgroundColor = color;
+            point.dataset.color = color;
+            point.dataset.side = side;
+            point.dataset.index = index;
+            point.onclick = () => selectPoint(point);
+            return point;
+        }
+
+        function selectPoint(point) {
+            if (point.classList.contains('connected')) return;
+
+            if (!selectedPoint) {
+                selectedPoint = point;
+                point.classList.add('selected');
+            } else {
+                if (selectedPoint === point) {
+                    selectedPoint.classList.remove('selected');
+                    selectedPoint = null;
+                    return;
+                }
+
+                if (selectedPoint.dataset.side !== point.dataset.side) {
+                    connectPoints(selectedPoint, point);
+                    moves++;
+                    updateDisplay();
+                }
+
+                selectedPoint.classList.remove('selected');
+                selectedPoint = null;
+            }
+        }
+
+        function connectPoints(point1, point2) {
+            const existingIndex = connections.findIndex(c => 
+                (c.point1 === point1 || c.point2 === point1) ||
+                (c.point1 === point2 || c.point2 === point2)
+            );
+
+            if (existingIndex !== -1) {
+                const conn = connections[existingIndex];
+                conn.point1.classList.remove('connected');
+                conn.point2.classList.remove('connected');
+                conn.line.remove();
+                connections.splice(existingIndex, 1);
+            }
+
+            const rect1 = point1.getBoundingClientRect();
+            const rect2 = point2.getBoundingClientRect();
+            const boardRect = document.getElementById('board').getBoundingClientRect();
+
+            const x1 = rect1.left + rect1.width / 2 - boardRect.left;
+            const y1 = rect1.top + rect1.height / 2 - boardRect.top;
+            const x2 = rect2.left + rect2.width / 2 - boardRect.left;
+            const y2 = rect2.top + rect2.height / 2 - boardRect.top;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('class', 'wire');
+            line.setAttribute('stroke', point1.dataset.color);
+
+            document.getElementById('svg').appendChild(line);
+
+            point1.classList.add('connected');
+            point2.classList.add('connected');
+
+            connections.push({ point1, point2, line });
+
+            checkWin();
+        }
+
+        function checkWin() {
+            if (connections.length !== correctPairs.length) return;
+
+            const allCorrect = connections.every(conn => 
+                conn.point1.dataset.color === conn.point2.dataset.color
+            );
+
+            if (allCorrect) {
+                setTimeout(() => {
+                    document.getElementById('message').textContent = '🎉 Уровень пройден!';
+                    setTimeout(() => {
+                        level++;
+                        updateDisplay();
+                        createLevel();
+                    }, 1500);
+                }, 300);
+            }
+        }
+
+        function resetLevel() {
+            moves = 0;
+            updateDisplay();
+            createLevel();
+        }
+
+        function newGame() {
+            level = 1;
+            moves = 0;
+            updateDisplay();
+            createLevel();
+        }
+
+        function updateDisplay() {
+            document.getElementById('levelDisplay').textContent = level;
+            document.getElementById('movesDisplay').textContent = moves;
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
